@@ -1,14 +1,28 @@
 {
   "$schema":  "https://raw.githubusercontent.com/jetify-com/devbox/0.13.0/.schema/devbox.schema.json",
-  "packages": ["go@1.23.1"],
+  "packages": [
+    "kubectl",
+    "kubernetes-helm-wrapped",
+    "docker",
+    "minikube@latest",
+    "go@1.23.1"
+  ],
+  "env": {
+      "MINIKUBE_HOME": "$PWD/home/.minikube",
+      "KUBECONFIG": "$PWD/home/.kube/config"
+  },
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null"
     ],
     "scripts": {
-      "test": [
-        "echo \"Error: no test specified\" && exit 1"
+      "minikube": [
+        "finish() { minikube stop; }",
+        "trap finish SIGTERM SIGINT EXIT",
+        "minikube start",
+        "minikube logs -f"
       ]
     }
   }
 }
+

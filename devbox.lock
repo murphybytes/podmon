@@ -1,6 +1,10 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "docker": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#docker",
+      "source": "nixpkg"
+    },
     "go@1.23.1": {
       "last_modified": "2024-09-10T15:01:03Z",
       "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#go_1_23",
@@ -46,6 +50,62 @@
             }
           ],
           "store_path": "/nix/store/mi0ybwsm6pmxzv9hsm6bcbqaq1pkf8wh-go-1.23.1"
+        }
+      }
+    },
+    "kubectl": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#kubectl",
+      "source": "nixpkg"
+    },
+    "kubernetes-helm-wrapped": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#kubernetes-helm-wrapped",
+      "source": "nixpkg"
+    },
+    "minikube@latest": {
+      "last_modified": "2024-09-11T08:20:13Z",
+      "resolved": "github:NixOS/nixpkgs/159be5db480d1df880a0135ca0bfed84c2f88353#minikube",
+      "source": "devbox-search",
+      "version": "1.34.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dgalrw3g701mp7h0knkjschzkjxqbn5z-minikube-1.34.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/dgalrw3g701mp7h0knkjschzkjxqbn5z-minikube-1.34.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/x7gymfjfkwia9yc8f3ki67b0kqq34cj2-minikube-1.34.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/x7gymfjfkwia9yc8f3ki67b0kqq34cj2-minikube-1.34.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7y50xf9mar35gpli9fpplbxv3g0djxj1-minikube-1.34.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7y50xf9mar35gpli9fpplbxv3g0djxj1-minikube-1.34.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xbq8q5zkc9kp75r94z1z8p4k4dwxkqss-minikube-1.34.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xbq8q5zkc9kp75r94z1z8p4k4dwxkqss-minikube-1.34.0"
         }
       }
     }
