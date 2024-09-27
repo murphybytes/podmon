@@ -6,22 +6,46 @@ import (
 	"path/filepath"
 	"time"
 
+	"k8s.io/api/core/v1"
 	k8s "k8s.io/client-go/kubernetes"
+	core "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
 type CallbackFn func([]string)
+type KeyValues map[string]string
+type PodGetter func(context.Context, string, KeyValues, core.CoreV1Interface) (*v1.PodList, error)
 
 // Config contains startup parameters
 type Config struct {
 	OnAddPods    CallbackFn
-	OnRemovePads CallbackFn
+	OnRemovePods CallbackFn
+	// Namespace of the pods we are interested in
+	Namespace string
+	// LabelSelector key value pairs from the pod label
+	LabelSelector KeyValues
+}
+
+type options struct {
+	podFn PodGetter
+}
+
+func WithPodGetterFunction(fn PodGetter) func(*options) {
+	return func(opt *options) {
+		opt.podFn = fn
+	}
 }
 
 // Start is called to start the pod finder service.  Pass in
 // a cancel context to communicate application shut down.
-func Start(ctx context.Context, cfg Config) error {
+func Start(ctx context.Context, cfg Config, opts ...func(*options)) error {
+	var opt options
+
+	for _, fn := range opts {
+		fn(&opt)
+	}
+
 	// we use this channel to block until we've statrted up, returning an error or nil.
 	responseCh := make(chan error, 1)
 
