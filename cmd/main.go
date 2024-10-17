@@ -17,11 +17,11 @@ func main() {
 	defer stop()
 
 	var cfg service.Config
-	cfg.OnAddPods = func(_ context.Context, ip string) {
-		fmt.Printf("Added IP: %s\n", ip)
+	cfg.OnModifiedPod = func(_ context.Context, podName string, ip string) {
+		fmt.Printf("Added Pod %s IP: %s\n", podName, ip)
 	}
-	cfg.OnRemovePods = func(_ context.Context, ip string) {
-		fmt.Printf("Removed IP: %s\n", ip)
+	cfg.OnRemovePods = func(_ context.Context, podName string) {
+		fmt.Printf("Removed IP: %s\n", podName)
 	}
 	cfg.OnStart = func(_ context.Context, ips []string) {
 		fmt.Printf("On Start: %v\n", ips)

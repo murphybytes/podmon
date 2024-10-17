@@ -15,7 +15,11 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-type EventHandlerFn func(context.Context, string)
+// ModfifiedEventHandlerFn recieves the pod name and an IP address
+type ModifiedEventHandlerFn func(context.Context, string, string)
+
+// DeleteEventHandler is called when a pod is removed, takes the pod name
+type DeleteEventHandlerFn func(context.Context, string)
 type StartHandlerFn func(context.Context, []string)
 type KeyValues map[string]string
 
@@ -37,9 +41,9 @@ type PodLister func(context.Context, string, KeyValues,
 
 // Config contains startup parameters
 type Config struct {
-	OnAddPods    EventHandlerFn
-	OnRemovePods EventHandlerFn
-	OnStart      StartHandlerFn
+	OnModifiedPod ModifiedEventHandlerFn
+	OnRemovePods  DeleteEventHandlerFn
+	OnStart       StartHandlerFn
 	// Namespace of the pods we are interested in
 	Namespace string
 	// LabelSelector key value pairs from the pod label
@@ -95,7 +99,7 @@ func Start(ctx context.Context, cfg *Config, opts ...func(*options)) error {
 			select {
 			case evt := <-watcher.ResultChan():
 				handleEvent(ctx, evt, handlerFns{
-					onAdd:    cfg.OnAddPods,
+					onAdd:    cfg.OnModifiedPod,
 					onRemove: cfg.OnRemovePods,
 				})
 
