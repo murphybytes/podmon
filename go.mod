@@ -2,6 +2,8 @@ module github.com/murphybytes/pod-finder
 
 go 1.23.1
 
+require golang.org/x/sync v0.9.0
+
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect

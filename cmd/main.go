@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/murphybytes/pod-finder/service"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -16,25 +17,33 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	var cfg service.Config
-	cfg.OnModifiedPod = func(_ context.Context, podName string, ip string) {
-		fmt.Printf("Added Pod %s IP: %s\n", podName, ip)
+	monitor, err := service.New("foo", service.KeyValues{"app": "busybox"})
+	if err != nil {
+		log.Fatal(err)
 	}
-	cfg.OnRemovePods = func(_ context.Context, podName string) {
-		fmt.Printf("Removed IP: %s\n", podName)
-	}
-	cfg.OnStart = func(_ context.Context, ips []string) {
-		fmt.Printf("On Start: %v\n", ips)
-	}
-	cfg.LabelSelector = service.KeyValues{
-		"app": "busybox",
-	}
-	cfg.Namespace = "foo"
-	if err := service.Start(ctx, &cfg); err != nil {
+
+	var eg errgroup.Group
+	eg.Go(func() error {
+		for evt := range monitor.Modified() {
+			fmt.Printf("pod modified name: %s ip: %s", evt.Name, evt.IpAddress)
+		}
+		return nil
+	})
+
+	eg.Go(func() error {
+		for evt := range monitor.Removed() {
+			fmt.Printf("pod removed name: %s", evt.Name)
+		}
+		return nil
+	})
+
+	if err := service.Start(ctx, monitor); err != nil {
 		log.Fatalf("Program terminated with error: %v", err)
 	}
 
 	<-ctx.Done()
 	fmt.Println(ctx.Err())
+
+	eg.Wait()
 
 }
