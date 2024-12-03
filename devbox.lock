@@ -1,9 +1,72 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "delve@latest": {
+      "last_modified": "2024-11-28T07:51:56Z",
+      "resolved": "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef#delve",
+      "source": "devbox-search",
+      "version": "1.23.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/vcny3sqr3cjnk34fa6f7xmvarn7rv4ml-delve-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/vcny3sqr3cjnk34fa6f7xmvarn7rv4ml-delve-1.23.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/6pd8inv56sw7dx3d83w8pqwqbwykvka6-delve-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/6pd8inv56sw7dx3d83w8pqwqbwykvka6-delve-1.23.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9dkf9acasib8nif4865qvp4w2scn4ry2-delve-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9dkf9acasib8nif4865qvp4w2scn4ry2-delve-1.23.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5gy1inwg9w11wgck708laayladfjy525-delve-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5gy1inwg9w11wgck708laayladfjy525-delve-1.23.1"
+        }
+      }
+    },
     "docker": {
       "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#docker",
-      "source": "nixpkg"
+      "source": "nixpkg",
+      "systems": {
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "man",
+              "path": "/nix/store/lddgshfw5zbv4f3nhhrz3mh8sxyi2wcj-docker-20.10.26-man",
+              "default": true
+            },
+            {
+              "path": "/nix/store/lxsvr9qjzamnc9smwr1m4gd4k7r2jzld-docker-20.10.26",
+              "default": true
+            }
+          ]
+        }
+      }
     },
     "go@1.23.1": {
       "last_modified": "2024-09-10T15:01:03Z",
@@ -55,15 +118,40 @@
     },
     "kubectl": {
       "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#kubectl",
-      "source": "nixpkg"
+      "source": "nixpkg",
+      "systems": {
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "path": "/nix/store/k3bhqxjgpxzlb6i28cyaxp84p13ky5q8-kubectl-1.28.3",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/n591fkha0bzh2vikpwzvqp34ffvw5r4g-kubectl-1.28.3-man",
+              "default": true
+            }
+          ]
+        }
+      }
     },
     "kubernetes-helm-wrapped": {
       "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#kubernetes-helm-wrapped",
-      "source": "nixpkg"
+      "source": "nixpkg",
+      "systems": {
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "path": "/nix/store/rqfmfjf0pxh1z6i4jdlbp0w2yzbvd55q-helm-3.13.1",
+              "default": true
+            }
+          ]
+        }
+      }
     },
     "minikube@latest": {
-      "last_modified": "2024-09-11T08:20:13Z",
-      "resolved": "github:NixOS/nixpkgs/159be5db480d1df880a0135ca0bfed84c2f88353#minikube",
+      "last_modified": "2024-11-28T07:51:56Z",
+      "resolved": "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef#minikube",
       "source": "devbox-search",
       "version": "1.34.0",
       "systems": {
@@ -71,41 +159,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dgalrw3g701mp7h0knkjschzkjxqbn5z-minikube-1.34.0",
+              "path": "/nix/store/vbjdgzx3z5w8853a103fhqwx48jspsxh-minikube-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dgalrw3g701mp7h0knkjschzkjxqbn5z-minikube-1.34.0"
+          "store_path": "/nix/store/vbjdgzx3z5w8853a103fhqwx48jspsxh-minikube-1.34.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/x7gymfjfkwia9yc8f3ki67b0kqq34cj2-minikube-1.34.0",
+              "path": "/nix/store/cvif298a6ria5r75pl42zv8x3rs2vqfc-minikube-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/x7gymfjfkwia9yc8f3ki67b0kqq34cj2-minikube-1.34.0"
+          "store_path": "/nix/store/cvif298a6ria5r75pl42zv8x3rs2vqfc-minikube-1.34.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/7y50xf9mar35gpli9fpplbxv3g0djxj1-minikube-1.34.0",
+              "path": "/nix/store/8lsn1z9nxzlxj0ajlvy317m58wg6rj3r-minikube-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/7y50xf9mar35gpli9fpplbxv3g0djxj1-minikube-1.34.0"
+          "store_path": "/nix/store/8lsn1z9nxzlxj0ajlvy317m58wg6rj3r-minikube-1.34.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/xbq8q5zkc9kp75r94z1z8p4k4dwxkqss-minikube-1.34.0",
+              "path": "/nix/store/m1kdfayk0c5a5z9njrgr873dn8d9dpd3-minikube-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/xbq8q5zkc9kp75r94z1z8p4k4dwxkqss-minikube-1.34.0"
+          "store_path": "/nix/store/m1kdfayk0c5a5z9njrgr873dn8d9dpd3-minikube-1.34.0"
         }
       }
     }

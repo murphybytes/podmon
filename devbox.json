@@ -1,15 +1,17 @@
 {
-  "$schema":  "https://raw.githubusercontent.com/jetify-com/devbox/0.13.0/.schema/devbox.schema.json",
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.0/.schema/devbox.schema.json",
   "packages": [
     "kubectl",
     "kubernetes-helm-wrapped",
     "docker",
     "minikube@latest",
-    "go@1.23.1"
+    "go@1.23.1",
+    "delve@latest"
   ],
   "env": {
-      "MINIKUBE_HOME": "$PWD/home/.minikube",
-      "KUBECONFIG": "$PWD/home/.kube/config"
+    "MINIKUBE_HOME": "$PWD/home/.minikube",
+    "KUBECONFIG":    "$PWD/home/.kube/config",
+    "CGO_CFLAGS": "-Wno-error=cpp"
   },
   "shell": {
     "init_hook": [
@@ -18,12 +20,10 @@
     "scripts": {
       "minikube": [
         "finish() { minikube stop; }",
-        "trap finish SIGTERM SIGINT EXIT",
+        "trap finish INT TERM EXIT",
         "minikube start",
         "minikube logs -f"
       ]
     }
   }
 }
-
-

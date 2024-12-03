@@ -34,8 +34,9 @@ func (kv *KeyValues) LabelSelector() string {
 	return strings.Join(selectors, ",")
 }
 
-type PodGetter func(context.Context, string, KeyValues,
-	core.CoreV1Interface) (watch.Interface, error)
+type EventChannelGetter func(context.Context, string, KeyValues,
+	core.CoreV1Interface) (<-chan watch.Event, error)
+
 type PodLister func(context.Context, string, KeyValues,
 	core.CoreV1Interface) ([]string, error)
 
@@ -51,13 +52,13 @@ type Config struct {
 }
 
 type options struct {
-	podMatcherFn PodGetter
-	podListerFn  PodLister
+	eventChannelGetterFn EventChannelGetter
+	podListerFn          PodLister
 }
 
-func WithPodGetterFunction(fn PodGetter) func(*options) {
+func WithPodGetterFunction(fn EventChannelGetter) func(*options) {
 	return func(opt *options) {
-		opt.podMatcherFn = fn
+		opt.eventChannelGetterFn = fn
 	}
 }
 
@@ -71,8 +72,8 @@ func WithPodListerFunction(fn PodLister) func(*options) {
 // a cancel context to communicate application shut down.
 func Start(ctx context.Context, cfg *Config, opts ...func(*options)) error {
 	opt := options{
-		podMatcherFn: getMatchingPods,
-		podListerFn:  listPodIps,
+		eventChannelGetterFn: getPodEventChannel,
+		podListerFn:          listPodIps,
 	}
 
 	for _, fn := range opts {
@@ -88,7 +89,7 @@ func Start(ctx context.Context, cfg *Config, opts ...func(*options)) error {
 			responseCh <- err
 			return
 		}
-		watcher, err := opt.podMatcherFn(ctx, cfg.Namespace, cfg.LabelSelector, client.CoreV1())
+		podEventCh, err := opt.eventChannelGetterFn(ctx, cfg.Namespace, cfg.LabelSelector, client.CoreV1())
 		if err != nil {
 			responseCh <- err
 			return
@@ -97,7 +98,7 @@ func Start(ctx context.Context, cfg *Config, opts ...func(*options)) error {
 
 		for {
 			select {
-			case evt := <-watcher.ResultChan():
+			case evt := <-podEventCh:
 				handleEvent(ctx, evt, handlerFns{
 					onAdd:    cfg.OnModifiedPod,
 					onRemove: cfg.OnRemovePods,
@@ -128,17 +129,21 @@ func getK8sClient() (*k8s.Clientset, error) {
 	return k8s.NewForConfig(result)
 }
 
-func getMatchingPods(
+func getPodEventChannel(
 	ctx context.Context,
 	ns string,
 	labels KeyValues,
 	client core.CoreV1Interface,
-) (watch.Interface, error) {
+) (<-chan watch.Event, error) {
 	opts := v1.ListOptions{
 		LabelSelector: labels.LabelSelector(),
 		Watch:         true,
 	}
-	return client.Pods(ns).Watch(ctx, opts)
+	watch, err := client.Pods(ns).Watch(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	return watch.ResultChan(), nil
 }
 
 func listPodIps(
