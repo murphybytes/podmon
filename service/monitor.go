@@ -44,6 +44,8 @@ type Monitorable interface {
 	handlers() (chan<- PodModifiedEvent, chan<- PodRemovedEvent)
 }
 
+// Monitor returns channels that will emit events when pods are modified or
+// removed.
 type Monitor struct {
 	client     *k8s.Clientset
 	selectors  KeyValues
@@ -62,6 +64,8 @@ func New(namespace string, selectors KeyValues) (*Monitor, error) {
 
 	return &Monitor{
 		client:     client,
+		namespace:  namespace,
+		selectors:  selectors,
 		modifiedCh: make(chan PodModifiedEvent),
 		removedCh:  make(chan PodRemovedEvent),
 	}, err

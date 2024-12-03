@@ -25,14 +25,14 @@ func main() {
 	var eg errgroup.Group
 	eg.Go(func() error {
 		for evt := range monitor.Modified() {
-			fmt.Printf("pod modified name: %s ip: %s", evt.Name, evt.IpAddress)
+			fmt.Printf("pod modified name: %s ip: %s\n", evt.Name, evt.IpAddress)
 		}
 		return nil
 	})
 
 	eg.Go(func() error {
 		for evt := range monitor.Removed() {
-			fmt.Printf("pod removed name: %s", evt.Name)
+			fmt.Printf("pod removed name: %s\n", evt.Name)
 		}
 		return nil
 	})
