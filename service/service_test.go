@@ -12,33 +12,27 @@ import (
 
 type mockMonitor struct {
 	eventCh    chan watch.Event
-	modifiedCh chan PodModifiedEvent
-	removedCh  chan PodRemovedEvent
+	modifiedCh chan PodEvent
 	monitorErr error
 }
 
 func newMock() *mockMonitor {
 	return &mockMonitor{
 		eventCh:    make(chan watch.Event),
-		modifiedCh: make(chan PodModifiedEvent),
-		removedCh:  make(chan PodRemovedEvent),
+		modifiedCh: make(chan PodEvent),
 	}
 }
 
-func (m *mockMonitor) Modified() <-chan PodModifiedEvent {
+func (m *mockMonitor) Events() chan PodEvent {
 	return m.modifiedCh
-}
-
-func (m *mockMonitor) Removed() <-chan PodRemovedEvent {
-	return m.removedCh
-}
-
-func (m *mockMonitor) handlers() (chan<- PodModifiedEvent, chan<- PodRemovedEvent) {
-	return m.modifiedCh, m.removedCh
 }
 
 func (m *mockMonitor) monitor(_ context.Context) (<-chan watch.Event, error) {
 	return m.eventCh, m.monitorErr
+}
+
+func (m *mockMonitor) listPods(_ context.Context) (Pods, error) {
+	return Pods{}, nil
 }
 
 func makePod(name, ip string) *corev1.Pod {
@@ -52,8 +46,7 @@ func TestService(t *testing.T) {
 	tt := []struct {
 		name         string
 		input        []watch.Event
-		modified     []PodModifiedEvent
-		removed      []PodRemovedEvent
+		modified     []PodEvent
 		monitorError error
 	}{
 		{
@@ -64,8 +57,8 @@ func TestService(t *testing.T) {
 					Object: makePod("pod1", "10.10.10.10"),
 				},
 			},
-			modified: []PodModifiedEvent{
-				{Name: "pod1", IpAddress: "10.10.10.10"},
+			modified: []PodEvent{
+				{Name: "pod1", EventType: watch.Added, IpAddress: "10.10.10.10"},
 			},
 		},
 		{
@@ -80,11 +73,9 @@ func TestService(t *testing.T) {
 					Object: makePod("pod1", ""),
 				},
 			},
-			modified: []PodModifiedEvent{
-				{Name: "pod1", IpAddress: "10.10.10.10"},
-			},
-			removed: []PodRemovedEvent{
-				{Name: "pod1"},
+			modified: []PodEvent{
+				{Name: "pod1", EventType: watch.Added, IpAddress: "10.10.10.10"},
+				{Name: "pod1", EventType: watch.Deleted, IpAddress: ""},
 			},
 		},
 	}
@@ -95,19 +86,12 @@ func TestService(t *testing.T) {
 			defer stop()
 
 			mon := newMock()
-			var modified []PodModifiedEvent
-			var removed []PodRemovedEvent
+			var modified []PodEvent
 
 			var g errgroup.Group
 			g.Go(func() error {
-				for evt := range mon.Modified() {
+				for evt := range mon.Events() {
 					modified = append(modified, evt)
-				}
-				return nil
-			})
-			g.Go(func() error {
-				for evt := range mon.Removed() {
-					removed = append(removed, evt)
 				}
 				return nil
 			})

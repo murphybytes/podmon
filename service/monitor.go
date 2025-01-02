@@ -14,9 +14,12 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-type KeyValues map[string]string
+// ModifiedBuffSz is the size of the modified channel, we want to leave a little
+const ChannelSz int = 100
 
-func (kv *KeyValues) LabelSelector() string {
+type Labels map[string]string
+
+func (kv *Labels) Selector() string {
 	if kv == nil {
 		return ""
 	}
@@ -27,65 +30,55 @@ func (kv *KeyValues) LabelSelector() string {
 	return strings.Join(selectors, ",")
 }
 
-type PodModifiedEvent struct {
+type PodEvent struct {
+	EventType watch.EventType
 	Name      string
 	IpAddress string
 }
 
-type PodRemovedEvent struct {
-	Name string
-}
+type Pods []PodEvent
+type Pod = PodEvent
 
 type Monitorable interface {
-	Modified() <-chan PodModifiedEvent
-	Removed() <-chan PodRemovedEvent
+	Events() chan PodEvent
 
 	monitor(context.Context) (<-chan watch.Event, error)
-	handlers() (chan<- PodModifiedEvent, chan<- PodRemovedEvent)
+	listPods(context.Context) (Pods, error)
 }
 
 // Monitor returns channels that will emit events when pods are modified or
 // removed.
 type Monitor struct {
-	client     *k8s.Clientset
-	selectors  KeyValues
-	namespace  string
-	modifiedCh chan PodModifiedEvent
-	removedCh  chan PodRemovedEvent
+	client    *k8s.Clientset
+	selectors Labels
+	namespace string
+	eventCh   chan PodEvent
 }
 
 // New returns a monitor that can be used to track removed and modified
-// pods identified by the namespace and selectors arguments.
-func New(namespace string, selectors KeyValues) (*Monitor, error) {
+// pods identified by the namespace and labels arguments.
+func New(namespace string, selectors Labels) (*Monitor, error) {
 	client, err := getK8sClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Monitor{
-		client:     client,
-		namespace:  namespace,
-		selectors:  selectors,
-		modifiedCh: make(chan PodModifiedEvent),
-		removedCh:  make(chan PodRemovedEvent),
+		client:    client,
+		namespace: namespace,
+		selectors: selectors,
+		eventCh:   make(chan PodEvent, ChannelSz),
 	}, err
 }
 
-// Modified returns a channel that will produce an event containing pod name
-// and IP address with a pod is added or modified
-func (pf *Monitor) Modified() <-chan PodModifiedEvent { return pf.modifiedCh }
-
-// Removed returns a channel that will produce and event contain the pod name
-// when the pod is removed
-func (pf *Monitor) Removed() <-chan PodRemovedEvent { return pf.removedCh }
-
-func (pf *Monitor) handlers() (chan<- PodModifiedEvent, chan<- PodRemovedEvent) {
-	return pf.modifiedCh, pf.removedCh
-}
+// Events returns a channel that will produce an event containing pod name
+// and IP address with a pod is added or modified. Expect to get multiple
+// events for the same pod.
+func (pf *Monitor) Events() chan PodEvent { return pf.eventCh }
 
 func (pf *Monitor) monitor(ctx context.Context) (<-chan watch.Event, error) {
 	opts := v1.ListOptions{
-		LabelSelector: pf.selectors.LabelSelector(),
+		LabelSelector: pf.selectors.Selector(),
 		Watch:         true,
 	}
 
@@ -96,6 +89,25 @@ func (pf *Monitor) monitor(ctx context.Context) (<-chan watch.Event, error) {
 	}
 
 	return watch.ResultChan(), nil
+}
+
+func (pf *Monitor) listPods(ctx context.Context) (Pods, error) {
+	pods := pf.client.CoreV1().Pods(pf.namespace)
+	podList, err := pods.List(ctx, v1.ListOptions{
+		LabelSelector: pf.selectors.Selector(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	var results Pods
+	for _, pod := range podList.Items {
+		results = append(results, Pod{
+			EventType: watch.Added,
+			Name:      pod.Name,
+			IpAddress: pod.Status.PodIP,
+		})
+	}
+	return results, nil
 }
 
 func getK8sClient() (*k8s.Clientset, error) {
